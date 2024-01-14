@@ -1,0 +1,8 @@
+# .gitignore
+
+# Ignorar archivos y directorios generados automáticamente
+node_modules/
+dist/
+
+# Ignorar el archivo .env
+.env
