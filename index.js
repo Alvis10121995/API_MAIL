@@ -35,6 +35,56 @@ app.get('/', (req, res) => {
   res.send('Server Api Carga de imagnes');
 });
 
+
+
+
+
+
+/// envio de correo
+enviarMail = async () => {  
+const transporter = nodemailer.createTransport({
+    service: 'smtp.gmail.com',
+    port : 587 ,
+    auth: {
+      user: 'alvis.atencio3@gmail.com',
+      pass: 'tu_contraseña',
+    },
+  });
+  
+  const mailOptions = {
+    from: 'alvis.atencio3@gmail.com',
+    to: 'alvis.atencio3@gmail.com',
+    subject: 'Prueba de envio',
+    text: 'Correo de prueba enviado desde API nodejs',
+    
+  /*  parte para manejar archivos adjuntados
+    attachments: [
+      {
+        filename: 'imagen_adjunta.jpg',
+        path: 'ruta_de_la_imagen_en_el_servidor.jpg',
+      },
+    ],
+*/
+
+  };
+  
+  await transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log('Correo enviado: ' + info.response);
+    }
+  });
+
+}
+
+
+enviarMail();
+
+
+
+
+
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
