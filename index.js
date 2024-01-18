@@ -1,8 +1,21 @@
 const express = require('express');
-const bodyParser = require('body-parser'); // Para parsear el cuerpo de las solicitudes POST
-const nodemailer = require('nodemailer');
-const multer = require('multer');
+const bodyParser = require('body-parser');
 
+ 
+const multer  = require('multer'), storage =multer.diskStorage({
+   destination : (req, file, cb) =>{
+    cb(null, './uploads')
+   },
+   filename: (req,file,cb)=>{
+    cb(null,file.originalname)
+   }
+
+})
+
+
+const upload = multer({storage})
+
+const transporter = require('./conect/conexion')
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -10,25 +23,43 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Configuración de Multer para la carga de archivos
-const storage = multer.memoryStorage(); // Almacenamiento en memoria
-const upload = multer({ storage: storage });
 
-// Ruta para cargar una imagen
-app.post('/upload', upload.single('image'), (req, res) => {
-  try {
-    // Acceder a la imagen cargada en req.file.buffer
-    const imageBuffer = req.file.buffer;
 
-    // Aquí puedes realizar acciones con la imagen, como enviarla por correo electrónico
-    // Puedes utilizar nodemailer para enviar la imagen adjunta por correo electrónico
 
-    res.status(200).json({ message: 'Imagen recibida con éxito' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al procesar la imagen' });
-  }
+
+
+
+// Ruta para la carga de imágenes
+app.post('/profile', upload.single('imagen'), function (req, res, next) {
+  // req.file is the `avatar` file
+  // req.body will hold the text fields, if there were any
+  const image = req.file;
+  console.log(image)
+  res.send("imagen cargada")
+})
+
+
+
+
+
+
+// Iniciar el servidor
+app.listen(port, () => {
+  console.log(`Servidor escuchando en el puerto ${port}`);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Ruta de ejemplo para la página principal
 app.get('/', (req, res) => {
@@ -40,20 +71,16 @@ app.get('/', (req, res) => {
 
 
 
-/// envio de correo
-enviarMail = async () => {  
-const transporter = nodemailer.createTransport({
-    service: 'smtp.gmail.com',
-    port : 587 ,
-    auth: {
-      user: 'alvis.atencio3@gmail.com',
-      pass: 'tu_contraseña',
-    },
-  });
+
+
+
+// Ruta de ejemplo para la página principal
+app.get('/sendcorreo',  async (req, res) => {
+  console.log("Test de endpoind")
   
   const mailOptions = {
-    from: 'alvis.atencio3@gmail.com',
-    to: 'alvis.atencio3@gmail.com',
+    from: 'info@examole.com',
+    to: 'maydiaz3095@gmail.com',
     subject: 'Prueba de envio',
     text: 'Correo de prueba enviado desde API nodejs',
     
@@ -68,24 +95,28 @@ const transporter = nodemailer.createTransport({
 
   };
   
-  await transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error(error);
-    } else {
-      console.log('Correo enviado: ' + info.response);
-    }
-  });
-
-}
 
 
-enviarMail();
+  
+  try {
+ 
+    // manejo de error
+    const info = await transporter.sendMail(mailOptions);
+    res.json(info);
+
+  } catch (error) {
+     console.log("find error",error)
+     res.send("error")
+  }
+
+ 
 
 
 
 
-
-// Iniciar el servidor
-app.listen(port, () => {
-  console.log(`Servidor escuchando en el puerto ${port}`);
+  
 });
+
+
+
+
